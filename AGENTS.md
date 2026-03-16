@@ -6,7 +6,40 @@ This file provides guidance for agentic coding agents operating in this reposito
 
 ## Project Overview
 
-A Bun-native TypeScript project. Bun is the runtime, package manager, bundler, and test runner — no Node.js, npm, pnpm, Vite, Jest, or Webpack.
+An OpenCode plugin (`opencode-git-memory`) that automatically stores AI conversation history as git notes metadata on each commit. Built as a Bun-native TypeScript project — Bun is the runtime, package manager, and test runner. No Node.js, npm, pnpm, Jest, or Webpack.
+
+### How it works
+
+1. Hooks into OpenCode's `tool.execute.after` event
+2. Detects successful `git commit` bash commands
+3. Fetches session messages since the last commit
+4. Renders them as a Markdown transcript (text, reasoning, and tool parts only)
+5. Attaches the transcript to the new commit via `git notes --ref=refs/notes/opencode`
+
+### Key design decisions
+
+- **Append mode**: Multiple commits in one session concatenate notes with `---` separators
+- **Custom git notes ref**: `refs/notes/opencode` (keeps notes separate from default ref)
+- **Tool output hidden**: Tool parts record name and status only — no input/output to avoid leaking file paths
+- **Session-scoped**: Only messages from the current session, since the previous commit
+- **Noise filtering**: Skips `snapshot`, `patch`, `step-start`, `step-finish`, and `compaction` parts
+
+---
+
+## Project Structure
+
+```
+src/
+├── index.ts              ← Plugin entry point (exports GitMemory)
+├── index.test.ts         ← Plugin hook tests
+├── transcript.ts         ← renderTranscript() + MessageWithParts type
+├── notes-reader.ts       ← Git notes reading logic (branch detection, commit scanning, system prompt)
+└── notes-reader.test.ts  ← Tests for notes reader functions
+dist/                     ← Build output (gitignored, included in npm package)
+tsconfig.json             ← Base config (noEmit, for type-checking)
+tsconfig.build.json       ← Build config (emits .js + .d.ts to dist/)
+package.json              ← npm package config
+```
 
 ---
 
@@ -17,19 +50,9 @@ A Bun-native TypeScript project. Bun is the runtime, package manager, bundler, a
 bun install
 ```
 
-### Run the project
+### Build (emit JS + declarations to dist/)
 ```sh
-bun run index.ts
-```
-
-### Run with hot reload
-```sh
-bun --hot ./index.ts
-```
-
-### Build
-```sh
-bun build <file.html|file.ts|file.css>
+bun run build
 ```
 
 ### Type-check (no emit)
@@ -44,7 +67,7 @@ bun test
 
 ### Run a single test file
 ```sh
-bun test path/to/file.test.ts
+bun test src/index.test.ts
 ```
 
 ### Run tests matching a name pattern
