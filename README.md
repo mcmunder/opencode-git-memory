@@ -1,14 +1,14 @@
 # opencode-git-memory
 
-An [OpenCode](https://opencode.ai) plugin that gives your AI agent memory that persists across sessions and travels with your code.
+An [OpenCode](https://opencode.ai) plugin that gives your AI agent conversation context scoped to your branch and traveling with your code.
 
 ## Why This Plugin
 
-AI conversations during coding sessions contain valuable context — decisions made, approaches considered, reasoning behind changes — that is normally lost when the session ends. The next time you (or the AI) revisit the same code, all of that context has to be rebuilt from scratch.
+When you start a fresh AI session, the agent has no idea what was discussed in previous sessions — the decisions made, the approaches tried, the reasoning behind changes. All of that context has to be rebuilt from scratch.
 
-OpenCode stores session history locally on your machine, but this history isn't portable — collaborators working on the same branch have no visibility into the AI conversations that shaped the code. Git notes solve this: they live in the repository itself and can be pushed and fetched just like branches, making conversation context shareable across your team.
+OpenCode stores session history locally on your machine, but this history isn't portable across machines, and collaborators have no visibility into the AI conversations that shaped the code. Git notes solve this: they live in the repository itself, scoped to individual commits, and can be pushed and fetched just like branches.
 
-This plugin attaches conversation transcripts to git commits using [git notes](https://git-scm.com/docs/git-notes). When a new session starts, it automatically surfaces this historical context, giving the AI "memory" scoped to your branch and commit history.
+This plugin attaches conversation transcripts to git commits using [git notes](https://git-scm.com/docs/git-notes). When a new session starts, it surfaces the conversation context from the current branch, so the AI can pick up where the last session left off. This is not a full project history — it's the conversation context from your branch's commits.
 
 ## How It Works
 
@@ -26,11 +26,11 @@ If multiple commits happen in one session, each gets its own transcript appended
 
 ### Read path — restoring context
 
-When a new session starts, the plugin:
+When a new OpenCode session starts, the plugin:
 
-1. Scans the branch history for commits that have attached notes
-2. Injects a summary of available notes into the AI's system prompt
-3. Provides a `git_notes_read` tool that the agent can use directly to retrieve full conversation transcripts for any commit
+1. Scans commits on the current branch for attached notes — on feature branches, all commits since the branch point; on the default branch, the last 10 commits
+2. Injects a summary of available context into the AI's system prompt
+3. Provides a `git_notes_read` tool that the agent can use to retrieve full conversation transcripts for any commit
 
 ### Notification
 
