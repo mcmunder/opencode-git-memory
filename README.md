@@ -2,7 +2,7 @@
 
 An [OpenCode](https://opencode.ai) plugin that gives your AI agent memory that persists across sessions and travels with your code.
 
-## The Idea
+## Why This Plugin
 
 AI conversations during coding sessions contain valuable context — decisions made, approaches considered, reasoning behind changes — that is normally lost when the session ends. The next time you (or the AI) revisit the same code, all of that context has to be rebuilt from scratch.
 
@@ -21,6 +21,8 @@ When a `git commit` is executed during an OpenCode session, the plugin:
 3. Attaches the transcript to the new commit as a git note under `refs/notes/opencode`
 
 If multiple commits happen in one session, each gets its own transcript appended with a separator.
+
+> **Warning:** Git notes are stored in the repository and can be pushed to remotes. While the plugin strips tool input/output to reduce exposure, conversation text itself is captured. If secrets (API keys, passwords, tokens) appear in your conversation messages, they could end up in the notes. Avoid pasting secrets directly into the chat, and review notes before pushing with `git notes --ref=refs/notes/opencode show <commit>`.
 
 ### Read path — restoring context
 
