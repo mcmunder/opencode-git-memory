@@ -15,6 +15,6 @@
       "enabled": true
     }
   },
-  "plugin": ["@mcmunder/opencode-git-memory"],
+  "plugin": ["@mcmunder/opencode-git-memory@latest"],
   "share": "disabled"
 }
