@@ -2,7 +2,7 @@
   "name": "@mcmunder/opencode-git-memory",
   "version": "0.1.0",
   "private": true,
-  "description": "An [OpenCode](https://opencode.ai) plugin that gives your AI agent memory that persists across sessions and travels with your code.",
+  "description": "An OpenCode plugin that gives your AI agent conversation context scoped to your branch and traveling with your code.",
   "type": "module",
   "exports": {
     ".": {
