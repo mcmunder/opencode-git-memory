@@ -1,7 +1,6 @@
 {
   "name": "@mcmunder/opencode-git-memory",
   "version": "1.0.0",
-  "private": true,
   "description": "An OpenCode plugin that gives your AI agent conversation context scoped to your branch and traveling with your code.",
   "type": "module",
   "exports": {
@@ -32,6 +31,9 @@
     "conversation"
   ],
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
