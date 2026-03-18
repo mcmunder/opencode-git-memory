@@ -34,6 +34,15 @@
     "conversation"
   ],
   "license": "MIT",
+  "author": "mcmunder",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mcmunder/opencode-git-memory.git"
+  },
+  "homepage": "https://github.com/mcmunder/opencode-git-memory#readme",
+  "bugs": {
+    "url": "https://github.com/mcmunder/opencode-git-memory/issues"
+  },
   "publishConfig": {
     "access": "public"
   },
