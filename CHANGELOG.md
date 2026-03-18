@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/mcmunder/opencode-git-memory/compare/v1.0.0...v1.0.1) (2026-03-18)
+
+
+### Bug Fixes
+
+* enable npm publishing ([8b8b0ef](https://github.com/mcmunder/opencode-git-memory/commit/8b8b0efb64a09fae3c7ceb47fab3ede23a4dac43))
+
 # 1.0.0 (2026-03-18)
 
 
