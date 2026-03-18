@@ -3,6 +3,7 @@
   "version": "0.0.2",
   "description": "An OpenCode plugin that gives your AI agent conversation context scoped to your branch and traveling with your code.",
   "type": "module",
+  "main": "./dist/index.js",
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -45,7 +46,7 @@
     "simple-git-hooks": "^2.13.1"
   },
   "peerDependencies": {
-    "@opencode-ai/plugin": "1.2.27",
+    "@opencode-ai/plugin": "^1.1.0",
     "typescript": "^5"
   }
 }
