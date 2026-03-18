@@ -46,7 +46,7 @@
     "simple-git-hooks": "^2.13.1"
   },
   "peerDependencies": {
-    "@opencode-ai/plugin": ">=1.1.0",
+    "@opencode-ai/plugin": "^1.1.0",
     "typescript": "^5"
   }
 }
