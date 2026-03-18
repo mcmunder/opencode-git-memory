@@ -1,6 +1,6 @@
 {
   "name": "@mcmunder/opencode-git-memory",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "An OpenCode plugin that gives your AI agent conversation context scoped to your branch and traveling with your code.",
   "type": "module",
   "main": "./dist/index.js",
