@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.4
+
+### Patch Changes
+
+- 518f7f9: Point to git repo in package.json
+
 ## 0.0.3
 
 ### Patch Changes
