@@ -107,12 +107,15 @@ describe('findBranchPoint', () => {
 describe('listCommitsWithNotes', () => {
   test('lists commits with notes since branch point', async () => {
     const $ = mockShell({
-      'git log': 'aaa111\x00fix auth\x001710600000\nbbb222\x00refactor api\x001710500000\n',
+      'git log':
+        'aaa111\x00fix auth\x001710600000\nbbb222\x00refactor api\x001710500000\n',
       'notes --ref=refs/notes/opencode list aaa111': 'note-hash\n',
       'notes --ref=refs/notes/opencode list bbb222': new Error('no note'),
     })
     const result = await listCommitsWithNotes($, { branchPoint: 'base123' })
-    expect(result).toEqual([{ hash: 'aaa111', subject: 'fix auth', authorDate: 1710600000000 }])
+    expect(result).toEqual([
+      { hash: 'aaa111', subject: 'fix auth', authorDate: 1710600000000 },
+    ])
   })
 
   test('returns empty when no commits', async () => {
@@ -157,8 +160,16 @@ describe('readNote', () => {
 describe('buildSystemPromptSnippet', () => {
   test('builds markdown table', () => {
     const commits: CommitInfo[] = [
-      { hash: 'aaa11111222233334444', subject: 'fix auth bug', authorDate: 1710600000000 },
-      { hash: 'bbb11111222233334444', subject: 'refactor API', authorDate: 1710500000000 },
+      {
+        hash: 'aaa11111222233334444',
+        subject: 'fix auth bug',
+        authorDate: 1710600000000,
+      },
+      {
+        hash: 'bbb11111222233334444',
+        subject: 'refactor API',
+        authorDate: 1710500000000,
+      },
     ]
     const snippet = buildSystemPromptSnippet(commits)!
     expect(snippet).toContain('## Git Notes Context')
@@ -186,7 +197,9 @@ describe('scanCommitsWithNotes', () => {
       'notes --ref=refs/notes/opencode list ccc111': 'note-hash\n',
     })
     const result = await scanCommitsWithNotes($)
-    expect(result).toEqual([{ hash: 'ccc111', subject: 'add feature', authorDate: 1710600000000 }])
+    expect(result).toEqual([
+      { hash: 'ccc111', subject: 'add feature', authorDate: 1710600000000 },
+    ])
   })
 
   test('falls back to last N commits on default branch', async () => {
@@ -197,7 +210,9 @@ describe('scanCommitsWithNotes', () => {
       'notes --ref=refs/notes/opencode list ddd111': 'note-hash\n',
     })
     const result = await scanCommitsWithNotes($)
-    expect(result).toEqual([{ hash: 'ddd111', subject: 'latest commit', authorDate: 1710600000000 }])
+    expect(result).toEqual([
+      { hash: 'ddd111', subject: 'latest commit', authorDate: 1710600000000 },
+    ])
   })
 
   test('falls back to last N when no default branch detected', async () => {
@@ -209,10 +224,11 @@ describe('scanCommitsWithNotes', () => {
       'notes --ref=refs/notes/opencode list eee111': 'note-hash\n',
     })
     const result = await scanCommitsWithNotes($)
-    expect(result).toEqual([{ hash: 'eee111', subject: 'some commit', authorDate: 1710600000000 }])
+    expect(result).toEqual([
+      { hash: 'eee111', subject: 'some commit', authorDate: 1710600000000 },
+    ])
   })
 })
-
 
 // ---------------------------------------------------------------------------
 // formatRelativeDate
@@ -272,8 +288,16 @@ describe('buildNotificationText', () => {
 
   test('builds notification with relative dates', () => {
     const commits: CommitInfo[] = [
-      { hash: 'aaa11111222233334444', subject: 'fix auth bug', authorDate: NOW - 3600_000 },
-      { hash: 'bbb11111222233334444', subject: 'refactor API', authorDate: NOW - 2 * 86400_000 },
+      {
+        hash: 'aaa11111222233334444',
+        subject: 'fix auth bug',
+        authorDate: NOW - 3600_000,
+      },
+      {
+        hash: 'bbb11111222233334444',
+        subject: 'refactor API',
+        authorDate: NOW - 2 * 86400_000,
+      },
     ]
     const text = buildNotificationText(commits, NOW)!
     expect(text).toContain('2 commits')
@@ -286,7 +310,11 @@ describe('buildNotificationText', () => {
 
   test('uses singular for one commit', () => {
     const commits: CommitInfo[] = [
-      { hash: 'aaa11111222233334444', subject: 'fix bug', authorDate: NOW - 60_000 },
+      {
+        hash: 'aaa11111222233334444',
+        subject: 'fix bug',
+        authorDate: NOW - 60_000,
+      },
     ]
     const text = buildNotificationText(commits, NOW)!
     expect(text).toContain('1 commit')

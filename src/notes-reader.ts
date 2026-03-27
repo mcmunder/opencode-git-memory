@@ -8,18 +8,22 @@ export interface CommitInfo {
 }
 
 export interface BunShellLike {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (strings: TemplateStringsArray, ...values: any[]): { text(): Promise<string> }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-unused-vars
+  (strings: TemplateStringsArray, ...values: any): { text(): Promise<string> }
 }
 
 /**
  * Detect the default branch name.
  * Tries: origin/HEAD symbolic-ref → verify main → verify master → null
  */
-export async function detectDefaultBranch($: BunShellLike): Promise<string | null> {
+export async function detectDefaultBranch(
+  $: BunShellLike,
+): Promise<string | null> {
   // Try symbolic-ref (works when remote is configured)
   try {
-    const ref = (await $`git symbolic-ref refs/remotes/origin/HEAD`.text()).trim()
+    const ref = (
+      await $`git symbolic-ref refs/remotes/origin/HEAD`.text()
+    ).trim()
     // ref is like "refs/remotes/origin/main"
     const branch = ref.split('/').pop()
     if (branch) return branch
@@ -50,7 +54,10 @@ export async function detectDefaultBranch($: BunShellLike): Promise<string | nul
  * Find the merge-base between HEAD and the default branch.
  * Returns null if HEAD is on the default branch or detection fails.
  */
-export async function findBranchPoint($: BunShellLike, defaultBranch: string): Promise<string | null> {
+export async function findBranchPoint(
+  $: BunShellLike,
+  defaultBranch: string,
+): Promise<string | null> {
   try {
     const current = (await $`git branch --show-current`.text()).trim()
     if (current === defaultBranch) return null
@@ -80,9 +87,13 @@ export async function listCommitsWithNotes(
 
   try {
     if (opts.branchPoint) {
-      logOutput = (await $`git log --format=%H%x00%s%x00%at ${opts.branchPoint}..HEAD`.text()).trim()
+      logOutput = (
+        await $`git log --format=%H%x00%s%x00%at ${opts.branchPoint}..HEAD`.text()
+      ).trim()
     } else {
-      logOutput = (await $`git log --format=%H%x00%s%x00%at -n ${String(limit)} HEAD`.text()).trim()
+      logOutput = (
+        await $`git log --format=%H%x00%s%x00%at -n ${String(limit)} HEAD`.text()
+      ).trim()
     }
   } catch {
     return []
@@ -113,9 +124,14 @@ export async function listCommitsWithNotes(
 /**
  * Read the full note for a specific commit.
  */
-export async function readNote($: BunShellLike, commitHash: string): Promise<string | null> {
+export async function readNote(
+  $: BunShellLike,
+  commitHash: string,
+): Promise<string | null> {
   try {
-    const note = (await $`git notes --ref=${NOTES_REF} show ${commitHash}`.text()).trim()
+    const note = (
+      await $`git notes --ref=${NOTES_REF} show ${commitHash}`.text()
+    ).trim()
     return note || null
   } catch {
     return null
@@ -156,7 +172,8 @@ export function formatRelativeDate(timestampMs: number, now?: number): string {
   if (seconds < 60) return 'just now'
 
   const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return minutes === 1 ? '1 minute ago' : `${minutes} minutes ago`
+  if (minutes < 60)
+    return minutes === 1 ? '1 minute ago' : `${minutes} minutes ago`
 
   const hours = Math.floor(minutes / 60)
   if (hours < 24) return hours === 1 ? '1 hour ago' : `${hours} hours ago`
@@ -177,7 +194,10 @@ export function formatRelativeDate(timestampMs: number, now?: number): string {
 /**
  * Build a visible notification message listing commits with notes.
  */
-export function buildNotificationText(commits: CommitInfo[], now?: number): string | null {
+export function buildNotificationText(
+  commits: CommitInfo[],
+  now?: number,
+): string | null {
   if (commits.length === 0) return null
 
   const lines = [
@@ -191,7 +211,9 @@ export function buildNotificationText(commits: CommitInfo[], now?: number): stri
   }
 
   lines.push('')
-  lines.push('Your agent has access to the `git_notes_read` tool and can retrieve full conversation transcripts directly.')
+  lines.push(
+    'Your agent has access to the `git_notes_read` tool and can retrieve full conversation transcripts directly.',
+  )
 
   return lines.join('\n')
 }
@@ -199,7 +221,9 @@ export function buildNotificationText(commits: CommitInfo[], now?: number): stri
 /**
  * High-level: scan for commits with notes since branch point (or last N).
  */
-export async function scanCommitsWithNotes($: BunShellLike): Promise<CommitInfo[]> {
+export async function scanCommitsWithNotes(
+  $: BunShellLike,
+): Promise<CommitInfo[]> {
   const defaultBranch = await detectDefaultBranch($)
 
   let branchPoint: string | null = null
