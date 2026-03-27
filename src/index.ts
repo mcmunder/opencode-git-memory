@@ -12,6 +12,7 @@ import type { CommitInfo } from './notes-reader.ts'
 
 const NOTES_REF = 'refs/notes/opencode'
 const GIT_COMMIT_RE = /\bgit\s+commit\b/
+const GIT_AMEND_RE = /--amend\b/
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function log(client: any, level: string, message: string) {
@@ -35,6 +36,9 @@ export const GitMemory: Plugin = async ({ client, $ }) => {
   // Store last bash command from tool.execute.before so we can check it in .after
   // (tool.execute.after input may not include args in older SDK versions)
   let lastBashCommand = ''
+
+  // Capture HEAD before a commit so we can detect amends and carry forward old notes
+  let lastPreCommitHash = ''
 
   // --- Read path: cached commit index for system prompt ---
   let cachedCommits: CommitInfo[] | null = null
@@ -141,6 +145,14 @@ export const GitMemory: Plugin = async ({ client, $ }) => {
     'tool.execute.before': async (input, output) => {
       if (input.tool === 'bash') {
         lastBashCommand = String(output.args?.command ?? '')
+        // Capture HEAD before commit so we can detect amends
+        if (GIT_COMMIT_RE.test(lastBashCommand)) {
+          try {
+            lastPreCommitHash = (await $`git rev-parse HEAD`.text()).trim()
+          } catch {
+            lastPreCommitHash = ''
+          }
+        }
       }
     },
 
@@ -198,7 +210,7 @@ export const GitMemory: Plugin = async ({ client, $ }) => {
 
         const transcript = renderTranscript(newMessages, sessionID)
 
-        // Read existing note (if any)
+        // Read existing note on new hash (if any — e.g. multiple commits in one session)
         let existingNote = ''
         try {
           existingNote = (
@@ -208,9 +220,25 @@ export const GitMemory: Plugin = async ({ client, $ }) => {
           // No existing note
         }
 
-        const fullNote = existingNote
-          ? existingNote + '\n\n---\n\n' + transcript
-          : transcript
+        // If this was an amend, carry forward the note from the old (replaced) commit
+        let oldNote = ''
+        if (
+          GIT_AMEND_RE.test(cmd) &&
+          lastPreCommitHash &&
+          lastPreCommitHash !== newHash
+        ) {
+          try {
+            oldNote = (
+              await $`git notes --ref=${NOTES_REF} show ${lastPreCommitHash}`.text()
+            ).trim()
+          } catch {
+            // No note on old commit
+          }
+        }
+
+        const fullNote = [oldNote, existingNote, transcript]
+          .filter(Boolean)
+          .join('\n\n---\n\n')
 
         await $`git notes --ref=${NOTES_REF} add -f -m ${fullNote} ${newHash}`
 
