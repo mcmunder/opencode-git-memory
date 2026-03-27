@@ -1,4 +1,4 @@
-import { test, expect, describe, mock, beforeEach } from 'bun:test'
+import { test, expect, describe, mock } from 'bun:test'
 import { GitMemory } from './index.ts'
 import { renderTranscript } from './transcript.ts'
 import type { MessageWithParts } from './transcript.ts'
@@ -91,7 +91,6 @@ describe('renderTranscript', () => {
     expect(result).toContain('> **Reasoning:** Let me think about this.')
   })
 
-
   test('returns header only for empty messages array', () => {
     const result = renderTranscript([], 'sess-1')
     expect(result).toContain('# OpenCode Session Transcript')
@@ -108,7 +107,11 @@ describe('renderTranscript', () => {
           {
             type: 'tool',
             tool: 'bash',
-            state: { status: 'error', input: { command: 'ls' }, output: 'should not appear' },
+            state: {
+              status: 'error',
+              input: { command: 'ls' },
+              output: 'should not appear',
+            },
           },
         ],
       },
@@ -161,7 +164,8 @@ function createMockShell(responses: Record<string, string> = {}) {
       }
     }
     return {
-      text: () => Promise.reject(new Error(`mock shell: no match for "${cmd.trim()}"`)),
+      text: () =>
+        Promise.reject(new Error(`mock shell: no match for "${cmd.trim()}"`)),
     }
   }
   return { shell, calls }
@@ -170,9 +174,7 @@ function createMockShell(responses: Record<string, string> = {}) {
 function createMockClient(messages: MessageWithParts[] = []) {
   return {
     session: {
-      messages: mock(() =>
-        Promise.resolve({ data: messages }),
-      ),
+      messages: mock(() => Promise.resolve({ data: messages })),
       prompt: mock(() => Promise.resolve()),
     },
     app: {
@@ -186,9 +188,8 @@ function createMockClient(messages: MessageWithParts[] = []) {
 // ---------------------------------------------------------------------------
 
 describe('GitMemory', () => {
-
   test('ignores non-bash tools', async () => {
-    const { shell, calls } = createMockShell({
+    const { shell } = createMockShell({
       'git log': '1710600000\n',
     })
     const mockClient = createMockClient()
@@ -210,7 +211,7 @@ describe('GitMemory', () => {
   })
 
   test('ignores bash commands that are not git commit', async () => {
-    const { shell, calls } = createMockShell({
+    const { shell } = createMockShell({
       'git log': '1710600000\n',
     })
     const mockClient = createMockClient()
@@ -224,7 +225,12 @@ describe('GitMemory', () => {
     })
 
     await hooks['tool.execute.after']!(
-      { tool: 'bash', sessionID: 'sess-1', callID: 'c1', args: { command: 'git status' } },
+      {
+        tool: 'bash',
+        sessionID: 'sess-1',
+        callID: 'c1',
+        args: { command: 'git status' },
+      },
       { title: '', output: 'ok', metadata: {} },
     )
 
@@ -246,7 +252,12 @@ describe('GitMemory', () => {
     })
 
     await hooks['tool.execute.after']!(
-      { tool: 'bash', sessionID: 'sess-1', callID: 'c1', args: { command: 'git commit -m "test"' } },
+      {
+        tool: 'bash',
+        sessionID: 'sess-1',
+        callID: 'c1',
+        args: { command: 'git commit -m "test"' },
+      },
       { title: '', output: '', metadata: {} },
     )
 
@@ -257,12 +268,15 @@ describe('GitMemory', () => {
     const { shell, calls } = createMockShell({
       'git log': '1710600000\n',
       'git rev-parse HEAD': 'abc123\n',
-      'git notes --ref=refs/notes/opencode show': '',  // will throw — no existing note
+      'git notes --ref=refs/notes/opencode show': '', // will throw — no existing note
       'git notes --ref=refs/notes/opencode add': '',
     })
     // Override: make 'show' throw
     const originalShell = shell
-    const patchedShell = (strings: TemplateStringsArray, ...values: unknown[]) => {
+    const patchedShell = (
+      strings: TemplateStringsArray,
+      ...values: unknown[]
+    ) => {
       let cmd = ''
       strings.forEach((s, i) => {
         cmd += s
@@ -292,13 +306,20 @@ describe('GitMemory', () => {
     })
 
     await hooks['tool.execute.after']!(
-      { tool: 'bash', sessionID: 'sess-1', callID: 'c1', args: { command: 'git commit -m "fix bug"' } },
+      {
+        tool: 'bash',
+        sessionID: 'sess-1',
+        callID: 'c1',
+        args: { command: 'git commit -m "fix bug"' },
+      },
       { title: '', output: '[main abc123] fix bug', metadata: {} },
     )
 
     expect(mockClient.session.messages).toHaveBeenCalledTimes(1)
     // Verify git notes add was called
-    const addCall = calls.find(c => c.includes('git notes') && c.includes('add'))
+    const addCall = calls.find(
+      (c) => c.includes('git notes') && c.includes('add'),
+    )
     expect(addCall).toBeDefined()
     expect(addCall).toContain('abc123')
   })
@@ -328,12 +349,19 @@ describe('GitMemory', () => {
     })
 
     await hooks['tool.execute.after']!(
-      { tool: 'bash', sessionID: 'sess-1', callID: 'c1', args: { command: 'git commit -m "test"' } },
+      {
+        tool: 'bash',
+        sessionID: 'sess-1',
+        callID: 'c1',
+        args: { command: 'git commit -m "test"' },
+      },
       { title: '', output: '[main abc123] test', metadata: {} },
     )
 
     // git notes add should NOT have been called
-    const addCall = calls.find(c => c.includes('git notes') && c.includes('add'))
+    const addCall = calls.find(
+      (c) => c.includes('git notes') && c.includes('add'),
+    )
     expect(addCall).toBeUndefined()
   })
 
@@ -370,7 +398,12 @@ describe('GitMemory', () => {
 
     // Should not throw
     await hooks['tool.execute.after']!(
-      { tool: 'bash', sessionID: 'sess-1', callID: 'c1', args: { command: 'git commit -m "test"' } },
+      {
+        tool: 'bash',
+        sessionID: 'sess-1',
+        callID: 'c1',
+        args: { command: 'git commit -m "test"' },
+      },
       { title: '', output: 'committed', metadata: {} },
     )
 
@@ -406,12 +439,19 @@ describe('GitMemory', () => {
     })
 
     await hooks['tool.execute.after']!(
-      { tool: 'bash', sessionID: 'sess-1', callID: 'c1', args: { command: 'git commit -m "test"' } },
+      {
+        tool: 'bash',
+        sessionID: 'sess-1',
+        callID: 'c1',
+        args: { command: 'git commit -m "test"' },
+      },
       { title: '', output: 'committed', metadata: {} },
     )
 
     // The add call should contain both old and new content with separator
-    const addCall = calls.find(c => c.includes('git notes') && c.includes('add'))
+    const addCall = calls.find(
+      (c) => c.includes('git notes') && c.includes('add'),
+    )
     expect(addCall).toBeDefined()
     expect(addCall).toContain('Previous note content')
     expect(addCall).toContain('---')
@@ -419,7 +459,10 @@ describe('GitMemory', () => {
   })
 
   test('handles repo with no commits at init', async () => {
-    const failInitShell = (strings: TemplateStringsArray, ...values: unknown[]) => {
+    const failInitShell = (
+      strings: TemplateStringsArray,
+      ...values: unknown[]
+    ) => {
       let cmd = ''
       strings.forEach((s, i) => {
         cmd += s
@@ -460,7 +503,12 @@ describe('GitMemory', () => {
 
     // prevCommitTimestamp should be 0, so all messages are included
     await hooks['tool.execute.after']!(
-      { tool: 'bash', sessionID: 'sess-1', callID: 'c1', args: { command: 'git commit -m "initial"' } },
+      {
+        tool: 'bash',
+        sessionID: 'sess-1',
+        callID: 'c1',
+        args: { command: 'git commit -m "initial"' },
+      },
       { title: '', output: 'committed', metadata: {} },
     )
 
@@ -473,13 +521,15 @@ describe('GitMemory', () => {
 // ---------------------------------------------------------------------------
 
 describe('GitMemory read path', () => {
-  function createReadPathShell(opts: {
-    defaultBranch?: string
-    currentBranch?: string
-    mergeBase?: string
-    commits?: string
-    noteResponses?: Record<string, string | Error>
-  } = {}) {
+  function createReadPathShell(
+    opts: {
+      defaultBranch?: string
+      currentBranch?: string
+      mergeBase?: string
+      commits?: string
+      noteResponses?: Record<string, string | Error>
+    } = {},
+  ) {
     return (strings: TemplateStringsArray, ...values: unknown[]) => {
       let cmd = ''
       strings.forEach((s, i) => {
@@ -496,7 +546,10 @@ describe('GitMemory read path', () => {
       // Default branch detection
       if (cmd.includes('symbolic-ref')) {
         if (opts.defaultBranch) {
-          return { text: () => Promise.resolve(`refs/remotes/origin/${opts.defaultBranch}\n`) }
+          return {
+            text: () =>
+              Promise.resolve(`refs/remotes/origin/${opts.defaultBranch}\n`),
+          }
         }
         return { text: () => Promise.reject(new Error('no ref')) }
       }
@@ -515,7 +568,9 @@ describe('GitMemory read path', () => {
 
       // Current branch
       if (cmd.includes('branch --show-current')) {
-        return { text: () => Promise.resolve(`${opts.currentBranch ?? 'main'}\n`) }
+        return {
+          text: () => Promise.resolve(`${opts.currentBranch ?? 'main'}\n`),
+        }
       }
 
       // Merge base
@@ -636,7 +691,16 @@ describe('GitMemory read path', () => {
 
     const result = await hooks.tool!.git_notes_read!.execute(
       { commit: 'abc123' },
-      { sessionID: 'sess-1', messageID: 'm1', agent: 'default', directory: '/test', worktree: '/test', abort: new AbortController().signal, metadata: () => {}, ask: async () => {} },
+      {
+        sessionID: 'sess-1',
+        messageID: 'm1',
+        agent: 'default',
+        directory: '/test',
+        worktree: '/test',
+        abort: new AbortController().signal,
+        metadata: () => {},
+        ask: async () => {},
+      },
     )
 
     expect(result).toBe('Full note content here')
@@ -660,7 +724,16 @@ describe('GitMemory read path', () => {
 
     const result = await hooks.tool!.git_notes_read!.execute(
       { commit: 'nonexistent' },
-      { sessionID: 'sess-1', messageID: 'm1', agent: 'default', directory: '/test', worktree: '/test', abort: new AbortController().signal, metadata: () => {}, ask: async () => {} },
+      {
+        sessionID: 'sess-1',
+        messageID: 'm1',
+        agent: 'default',
+        directory: '/test',
+        worktree: '/test',
+        abort: new AbortController().signal,
+        metadata: () => {},
+        ask: async () => {},
+      },
     )
 
     expect(result).toContain('No git note found')
@@ -670,7 +743,8 @@ describe('GitMemory read path', () => {
     const shell = createReadPathShell({
       defaultBranch: 'main',
       currentBranch: 'main',
-      commits: 'aaa111\x00fix auth\x001710600000\nbbb222\x00refactor api\x001710500000\n',
+      commits:
+        'aaa111\x00fix auth\x001710600000\nbbb222\x00refactor api\x001710500000\n',
       noteResponses: {
         aaa111: 'Note for aaa',
         bbb222: 'Note for bbb',
@@ -688,7 +762,16 @@ describe('GitMemory read path', () => {
 
     const result = await hooks.tool!.git_notes_read!.execute(
       {},
-      { sessionID: 'sess-1', messageID: 'm1', agent: 'default', directory: '/test', worktree: '/test', abort: new AbortController().signal, metadata: () => {}, ask: async () => {} },
+      {
+        sessionID: 'sess-1',
+        messageID: 'm1',
+        agent: 'default',
+        directory: '/test',
+        worktree: '/test',
+        abort: new AbortController().signal,
+        metadata: () => {},
+        ask: async () => {},
+      },
     )
 
     expect(result).toContain('Note for aaa')
@@ -706,7 +789,10 @@ describe('GitMemory read path', () => {
     })
 
     // Wrap to count scan calls
-    const trackingShell = (strings: TemplateStringsArray, ...values: unknown[]) => {
+    const trackingShell = (
+      strings: TemplateStringsArray,
+      ...values: unknown[]
+    ) => {
       let cmd = ''
       strings.forEach((s, i) => {
         cmd += s
@@ -749,10 +835,12 @@ describe('GitMemory read path', () => {
 // ---------------------------------------------------------------------------
 
 describe('GitMemory notification', () => {
-  function createNotificationShell(opts: {
-    commits?: string
-    noteResponses?: Record<string, string | Error>
-  } = {}) {
+  function createNotificationShell(
+    opts: {
+      commits?: string
+      noteResponses?: Record<string, string | Error>
+    } = {},
+  ) {
     return (strings: TemplateStringsArray, ...values: unknown[]) => {
       let cmd = ''
       strings.forEach((s, i) => {
@@ -803,10 +891,7 @@ describe('GitMemory notification', () => {
       serverUrl: new URL('http://localhost:4096'),
     })
 
-    await hooks['chat.message']!(
-      { sessionID: 'sess-1' } as any,
-      {} as any,
-    )
+    await hooks['chat.message']!({ sessionID: 'sess-1' } as any, {} as any)
 
     expect(mockClient.session.prompt).toHaveBeenCalledTimes(1)
     const call = (mockClient.session.prompt as any).mock.calls[0]![0]

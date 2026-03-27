@@ -73,9 +73,17 @@ export const GitMemory: Plugin = async ({ client, $ }) => {
             parts: [{ type: 'text', text }],
           },
         })
-        log(client, 'info', `Sent git notes notification for session ${sessionID.slice(0, 8)}`)
+        log(
+          client,
+          'info',
+          `Sent git notes notification for session ${sessionID.slice(0, 8)}`,
+        )
       } catch (err) {
-        log(client, 'warn', `Failed to send git notes notification: ${err instanceof Error ? err.message : String(err)}`)
+        log(
+          client,
+          'warn',
+          `Failed to send git notes notification: ${err instanceof Error ? err.message : String(err)}`,
+        )
       }
     },
 
@@ -155,7 +163,9 @@ export const GitMemory: Plugin = async ({ client, $ }) => {
 
         // Fetch session messages (v1 SDK path-style calling convention)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const response: unknown = await (client.session.messages as any)({ path: { id: sessionID } })
+        const response: unknown = await (client.session.messages as any)({
+          path: { id: sessionID },
+        })
 
         // Handle both response shapes:
         // - responseStyle "data": response IS the array
@@ -171,7 +181,11 @@ export const GitMemory: Plugin = async ({ client, $ }) => {
         ) {
           allMessages = (response as { data: MessageWithParts[] }).data
         } else {
-          log(client, 'warn', `Unexpected messages response shape: ${typeof response} / keys=${response != null && typeof response === 'object' ? Object.keys(response).join(',') : 'n/a'}`)
+          log(
+            client,
+            'warn',
+            `Unexpected messages response shape: ${typeof response} / keys=${response != null && typeof response === 'object' ? Object.keys(response).join(',') : 'n/a'}`,
+          )
           return
         }
 
@@ -208,7 +222,11 @@ export const GitMemory: Plugin = async ({ client, $ }) => {
 
         log(client, 'info', `Attached git note to ${newHash.slice(0, 8)}`)
       } catch (err) {
-        log(client, 'error', `Failed to attach git note: ${err instanceof Error ? err.stack ?? err.message : String(err)}`)
+        log(
+          client,
+          'error',
+          `Failed to attach git note: ${err instanceof Error ? (err.stack ?? err.message) : String(err)}`,
+        )
       }
     },
   }

@@ -46,36 +46,43 @@ package.json              ← npm package config
 ## Commands
 
 ### Install dependencies
+
 ```sh
 bun install
 ```
 
 ### Build (emit JS + declarations to dist/)
+
 ```sh
 bun run build
 ```
 
 ### Type-check (no emit)
+
 ```sh
 bunx tsc --noEmit
 ```
 
 ### Run all tests
+
 ```sh
 bun test
 ```
 
 ### Run a single test file
+
 ```sh
 bun test src/index.test.ts
 ```
 
 ### Run tests matching a name pattern
+
 ```sh
 bun test --test-name-pattern "pattern here"
 ```
 
 ### Run tests in watch mode
+
 ```sh
 bun test --watch
 ```
@@ -86,19 +93,19 @@ bun test --watch
 
 Always use Bun's built-in APIs instead of third-party equivalents:
 
-| Task | Use | Do NOT use |
-|---|---|---|
-| Run a file | `bun <file>` | `node <file>`, `ts-node <file>` |
-| HTTP server | `Bun.serve()` | `express`, `fastify` |
-| SQLite | `bun:sqlite` | `better-sqlite3` |
-| Redis | `Bun.redis` | `ioredis` |
-| Postgres | `Bun.sql` | `pg`, `postgres.js` |
-| WebSocket | built-in `WebSocket` | `ws` |
-| File I/O | `Bun.file()` | `node:fs` readFile/writeFile |
-| Shell commands | `Bun.$\`cmd\`` | `execa`, `child_process` |
-| Environment vars | automatic `.env` loading | `dotenv` |
-| Frontend | `Bun.serve()` with HTML imports | `vite`, `webpack`, `esbuild` |
-| Testing | `bun test` | `jest`, `vitest` |
+| Task             | Use                             | Do NOT use                      |
+| ---------------- | ------------------------------- | ------------------------------- |
+| Run a file       | `bun <file>`                    | `node <file>`, `ts-node <file>` |
+| HTTP server      | `Bun.serve()`                   | `express`, `fastify`            |
+| SQLite           | `bun:sqlite`                    | `better-sqlite3`                |
+| Redis            | `Bun.redis`                     | `ioredis`                       |
+| Postgres         | `Bun.sql`                       | `pg`, `postgres.js`             |
+| WebSocket        | built-in `WebSocket`            | `ws`                            |
+| File I/O         | `Bun.file()`                    | `node:fs` readFile/writeFile    |
+| Shell commands   | `Bun.$\`cmd\``                  | `execa`, `child_process`        |
+| Environment vars | automatic `.env` loading        | `dotenv`                        |
+| Frontend         | `Bun.serve()` with HTML imports | `vite`, `webpack`, `esbuild`    |
+| Testing          | `bun test`                      | `jest`, `vitest`                |
 
 ---
 
@@ -180,6 +187,7 @@ Key settings from `tsconfig.json`:
 ### Testing
 
 - Use Bun's built-in `bun:test` — do not install Jest or Vitest.
+
   ```ts
   import { test, expect, describe, beforeEach } from "bun:test";
 
@@ -189,6 +197,7 @@ Key settings from `tsconfig.json`:
     });
   });
   ```
+
 - Place test files next to the code they test, e.g., `foo.ts` → `foo.test.ts`.
 - Test file discovery: `**/*.test.ts`, `**/*.test.tsx`, `**/*.spec.ts`, `**/*.spec.tsx`.
 
@@ -206,5 +215,5 @@ The `.cursor/rules/use-bun-instead-of-node-vite-npm-pnpm.mdc` rule applies to al
 > Default to using Bun instead of Node.js.
 > `Bun.serve()` supports WebSockets, HTTPS, and routes — don't use Express.
 > HTML imports with `Bun.serve()` for frontend — don't use Vite.
-> `Bun.$\`ls\`` instead of execa.
+> `Bun.$` instead of execa.
 > Bun automatically loads `.env` — don't use dotenv.

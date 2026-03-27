@@ -1,6 +1,9 @@
 function formatTime(epochMs: number): string {
   const d = new Date(epochMs)
-  return d.toISOString().replace('T', ' ').replace(/\.\d+Z$/, 'Z')
+  return d
+    .toISOString()
+    .replace('T', ' ')
+    .replace(/\.\d+Z$/, 'Z')
 }
 
 function formatTimestamp(epochMs: number): string {
@@ -12,7 +15,12 @@ function formatTimestamp(epochMs: number): string {
 }
 
 export interface MessageWithParts {
-  info: { role: string; time: { created: number }; modelID?: string; providerID?: string }
+  info: {
+    role: string
+    time: { created: number }
+    modelID?: string
+    providerID?: string
+  }
   parts: Array<{
     type: string
     text?: string
@@ -40,9 +48,10 @@ export function renderTranscript(
   for (const { info, parts } of messages) {
     const ts = formatTimestamp(info.time.created)
     const role = info.role === 'user' ? 'User' : 'Assistant'
-    const model = info.role === 'assistant' && info.providerID && info.modelID
-      ? `  (${info.providerID}/${info.modelID})`
-      : ''
+    const model =
+      info.role === 'assistant' && info.providerID && info.modelID
+        ? `  (${info.providerID}/${info.modelID})`
+        : ''
     lines.push(`## [${ts}] ${role}${model}`)
     lines.push('')
 
